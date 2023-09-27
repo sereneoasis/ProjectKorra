@@ -752,14 +752,20 @@ public class PKListener implements Listener {
 		}
 	}
 
-	/*@EventHandler(priority = EventPriority.NORMAL, ignoreCancelled = true)
-	public void onEntitySuffocatedByTempBlocks(final EntityDamageEvent event) {
-		if (event.getCause() == DamageCause.SUFFOCATION) {
-			if (TempBlock.isTempBlock(event.getEntity().getLocation().add(0, 1, 0).getBlock())) {
-				event.setCancelled(true);
+	@EventHandler(priority = EventPriority.NORMAL, ignoreCancelled = true)
+    public void onEntitySuffocatedByTempBlocks(final EntityDamageEvent event) {
+        if (event.getCause() == DamageCause.SUFFOCATION) {
+			if (event.getEntity() instanceof Player)
+			{
+				Player player = (Player)event.getEntity();
+				if (TempBlock.isTempBlock(player.getEyeLocation().getBlock()) && player.getEyeLocation().getBlock().getType() == Material.ICE ||
+						TempBlock.isTempBlock(player.getLocation().getBlock()) && player.getLocation().getBlock().getType() == Material.ICE) {
+					event.setCancelled(true);
+				}
 			}
-		}
-	}*/
+
+        }
+    }
 
 	@EventHandler(priority = EventPriority.NORMAL, ignoreCancelled = true)
 	public void onEntityTarget(final EntityTargetEvent event) {
@@ -940,9 +946,19 @@ public class PKListener implements Listener {
 			CoreAbility ab = CoreAbility.getAbility(Acrobatics.class);
 
 			if (event.getCause() == DamageCause.FALL) {
-				event.setCancelled((gd != null && bPlayer.hasElement(Element.AIR) && bPlayer.canBendPassive(gd) && bPlayer.canUsePassive(gd) && gd.isEnabled() && PassiveManager.hasPassive(player, gd))
+				boolean shouldCancel = (gd != null && bPlayer.hasElement(Element.AIR) && bPlayer.canBendPassive(gd) && bPlayer.canUsePassive(gd) && gd.isEnabled() && PassiveManager.hasPassive(player, gd))
 						|| (ds != null && bPlayer.hasElement(Element.EARTH) && bPlayer.canBendPassive(ds) && bPlayer.canUsePassive(ds) && ds.isEnabled() && PassiveManager.hasPassive(player, ds) && DensityShift.softenLanding(player))
-						|| (hs != null && bPlayer.hasElement(Element.WATER) && bPlayer.canBendPassive(hs) && bPlayer.canUsePassive(hs) && hs.isEnabled() && PassiveManager.hasPassive(player, hs) && HydroSink.applyNoFall(player)));
+						|| (hs != null && bPlayer.hasElement(Element.WATER) && bPlayer.canBendPassive(hs) && bPlayer.canUsePassive(hs) && hs.isEnabled() && PassiveManager.hasPassive(player, hs) && HydroSink.applyNoFall(player));
+				if (shouldCancel) {
+					event.setCancelled(true);
+				}
+				else{
+					if (event.getDamage() > 4)
+					{
+						event.setDamage(4);
+					}
+				}
+
 			}
 
 			if (ab != null && bPlayer.hasElement(Element.CHI) && event.getCause() == DamageCause.FALL && bPlayer.canBendPassive(ab) && bPlayer.canUsePassive(ab) && ab.isEnabled() && PassiveManager.hasPassive(player, ab)) {
@@ -1022,6 +1038,7 @@ public class PKListener implements Listener {
 
 			final Ability boundAbil = sourceBPlayer.getBoundAbility();
 
+			/*
 			if (sourceBPlayer.getBoundAbility() != null) {
 				if (!sourceBPlayer.isOnCooldown(boundAbil)) {
 					if (sourceBPlayer.canBendPassive(sourceBPlayer.getBoundAbility())) {
@@ -1062,14 +1079,16 @@ public class PKListener implements Listener {
 				}
 			}
 
-			if (e.getCause() == DamageCause.ENTITY_ATTACK) {
+			 */
+
+			/*if (e.getCause() == DamageCause.ENTITY_ATTACK) {
 				PlayerSwingEvent swingEvent = new PlayerSwingEvent((Player)e.getDamager()); //Allow addons to handle a swing without
 				Bukkit.getPluginManager().callEvent(swingEvent);                       		//needing to repeat the checks above themselves
 				if (swingEvent.isCancelled()) {
 					e.setCancelled(true);
 					return;
 				}
-			}
+			}*/
 		}
 	}
 
